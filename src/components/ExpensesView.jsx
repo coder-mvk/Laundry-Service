@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -9,7 +9,6 @@ import {
   Calendar, 
   FileText, 
   TrendingDown,
-  Sparkles,
   AlertTriangle
 } from 'lucide-react';
 import { useCRM, getTodayDateString } from '../context/CRMContext';
@@ -34,14 +33,6 @@ export default function ExpensesView({ prefilledForm, clearPrefilledForm }) {
     date: ''
   });
 
-  // Open modal prefilled if triggered by quick actions
-  useEffect(() => {
-    if (prefilledForm === 'new') {
-      openModal();
-      clearPrefilledForm();
-    }
-  }, [prefilledForm]);
-
   const openModal = (exp = null) => {
     if (exp) {
       setEditingExpense(exp);
@@ -62,6 +53,15 @@ export default function ExpensesView({ prefilledForm, clearPrefilledForm }) {
     }
     setIsModalOpen(true);
   };
+
+  // Open modal prefilled if triggered by quick actions
+  useEffect(() => {
+    if (prefilledForm === 'new') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      openModal();
+      clearPrefilledForm();
+    }
+  }, [prefilledForm, clearPrefilledForm]);
 
   const closeModal = () => {
     setIsModalOpen(false);

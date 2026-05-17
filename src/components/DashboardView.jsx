@@ -1,23 +1,20 @@
-import React from 'react';
 import { 
   TrendingUp, 
   IndianRupee, 
   ShoppingCart, 
   Users, 
-  FileText, 
   ArrowUpRight, 
   ArrowDownRight, 
   Calendar,
   AlertTriangle,
   Sparkles,
-  Layers,
   Activity,
   Plus
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 
 export default function DashboardView({ setActiveTab, setPrefilledForm }) {
-  const { orders, enquiries, customers, subscriptions, expenses } = useCRM();
+  const { orders, enquiries, subscriptions, expenses } = useCRM();
 
   // Dynamic Metric Calculations
   const totalRevenue = orders.reduce((sum, o) => sum + Number(o.amount || 0), 0);
@@ -45,7 +42,6 @@ export default function DashboardView({ setActiveTab, setPrefilledForm }) {
     acc[src] = enquiries.filter(e => e.source.toLowerCase() === src.toLowerCase()).length;
     return acc;
   }, {});
-  const maxSourceCount = Math.max(...Object.values(sourceCounts), 1);
 
   // Quick Action Handlers
   const handleQuickAction = (tab, formType) => {

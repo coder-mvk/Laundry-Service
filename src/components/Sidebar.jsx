@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -9,7 +9,6 @@ import {
   Menu, 
   X, 
   RotateCcw,
-  TrendingUp,
   FileSpreadsheet,
   AlertTriangle,
   Trash2

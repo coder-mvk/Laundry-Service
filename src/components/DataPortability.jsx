@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Download, 
   Upload, 
-  RefreshCcw, 
   FileSpreadsheet, 
   Database,
   CheckCircle,
-  AlertTriangle,
-  FolderOpen
+  AlertTriangle
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 
@@ -19,8 +17,7 @@ export default function DataPortability() {
     subscriptions, 
     expenses, 
     importFullBackup, 
-    exportFullBackup,
-    restoreSeedData
+    exportFullBackup
   } = useCRM();
 
   const [importStatus, setImportStatus] = useState(null);
@@ -78,35 +75,31 @@ export default function DataPortability() {
 
   // Export handlers
   const handleExportCSV = (sheetType) => {
-    let csv = '';
-    let fileName = '';
-    
-    switch(sheetType) {
-      case 'enquiries':
-        csv = convertToCSV(enquiries, ['Date', 'Name', 'Phone', 'Source', 'Converted?', 'Follow-up']);
-        fileName = 'Enquiry_Customers.csv';
-        break;
-      case 'orders':
-        csv = convertToCSV(orders, ['Order ID', 'Date', 'Customer Phone', 'Customer Name', 'Service', 'Price per Kg', 'Weight(Kg)', 'Delivery Chrg', 'Amount', 'Payment', 'Pickup', 'Delivery', 'Status', 'Order Priority']);
-        fileName = 'Daily_Orders.csv';
-        break;
-      case 'customers':
-        csv = convertToCSV(customers, ['Customer ID', 'Name', 'Phone', 'Area', 'Address', 'Customer Type', 'Plan', 'Total Orders', 'Total Revenue', 'Last Order Date', 'Status']);
-        fileName = 'Customer_Master.csv';
-        break;
-      case 'subscriptions':
-        csv = convertToCSV(subscriptions, ['CustomerName', 'Phone', 'Plan', 'Start Date', 'End Date', 'Remaining KG', 'Renewal Status']);
-        fileName = 'Subscription_Customers.csv';
-        break;
-      case 'expenses':
-        csv = convertToCSV(expenses, ['Date', 'Type', 'Amount', 'Notes']);
-        fileName = 'Expenses.csv';
-        break;
-      default:
-        return;
-    }
-    
-    downloadCSV(csv, `laundry_crm_${fileName}`);
+    const exportMap = {
+      enquiries: {
+        csv: convertToCSV(enquiries, ['Date', 'Name', 'Phone', 'Source', 'Converted?', 'Follow-up']),
+        fileName: 'Enquiry_Customers.csv'
+      },
+      orders: {
+        csv: convertToCSV(orders, ['Order ID', 'Date', 'Customer Phone', 'Customer Name', 'Service', 'Price per Kg', 'Weight(Kg)', 'Delivery Chrg', 'Amount', 'Payment', 'Pickup', 'Delivery', 'Status', 'Order Priority']),
+        fileName: 'Daily_Orders.csv'
+      },
+      customers: {
+        csv: convertToCSV(customers, ['Customer ID', 'Name', 'Phone', 'Area', 'Address', 'Customer Type', 'Plan', 'Total Orders', 'Total Revenue', 'Last Order Date', 'Status']),
+        fileName: 'Customer_Master.csv'
+      },
+      subscriptions: {
+        csv: convertToCSV(subscriptions, ['CustomerName', 'Phone', 'Plan', 'Start Date', 'End Date', 'Remaining KG', 'Renewal Status']),
+        fileName: 'Subscription_Customers.csv'
+      },
+      expenses: {
+        csv: convertToCSV(expenses, ['Date', 'Type', 'Amount', 'Notes']),
+        fileName: 'Expenses.csv'
+      }
+    };
+    const exportPayload = exportMap[sheetType];
+    if (!exportPayload) return;
+    downloadCSV(exportPayload.csv, `laundry_crm_${exportPayload.fileName}`);
   };
 
   // JSON File upload handler
@@ -127,7 +120,7 @@ export default function DataPortability() {
         } else {
           setImportStatus({ type: 'error', message: `Import failed: ${res.error}` });
         }
-      } catch (err) {
+      } catch {
         setImportStatus({ type: 'error', message: 'Invalid backup file structure! Please upload a valid JSON backup.' });
       }
     };

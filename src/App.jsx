@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CRMProvider } from './context/CRMContext';
 import Sidebar from './components/Sidebar';
 import DashboardView from './components/DashboardView';

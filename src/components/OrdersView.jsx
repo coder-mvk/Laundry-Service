@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -6,13 +6,9 @@ import {
   Edit, 
   Trash2, 
   ShoppingBag, 
-  IndianRupee, 
-  Truck, 
-  CheckCircle2, 
   AlertCircle,
   Phone,
-  User,
-  Sparkles
+  User
 } from 'lucide-react';
 import { useCRM, getTodayDateString } from '../context/CRMContext';
 
@@ -54,28 +50,6 @@ export default function OrdersView({ prefilledForm, clearPrefilledForm }) {
 
   // Calculate live amount inside the form
   const liveAmount = (Number(formData.pricePerKg || 0) * Number(formData.weight || 0)) + Number(formData.deliveryChrg || 0);
-
-  // Triggered by quick actions or converted enquiries
-  useEffect(() => {
-    if (prefilledForm) {
-      if (prefilledForm === 'new') {
-        openModal();
-      } else if (typeof prefilledForm === 'object') {
-        openModal(null, prefilledForm);
-      }
-      clearPrefilledForm();
-    }
-  }, [prefilledForm]);
-
-  // Hook to auto-complete customer name from phone
-  useEffect(() => {
-    if (formData.customerPhone && formData.customerPhone.length >= 10) {
-      const match = customers.find(c => c.phone === formData.customerPhone);
-      if (match && match.name !== formData.customerName) {
-        setFormData(prev => ({ ...prev, customerName: match.name }));
-      }
-    }
-  }, [formData.customerPhone, customers]);
 
   const openModal = (order = null, draft = null) => {
     if (order) {
@@ -120,6 +94,32 @@ export default function OrdersView({ prefilledForm, clearPrefilledForm }) {
     }
     setIsModalOpen(true);
   };
+
+  const handleCustomerPhoneChange = (value) => {
+    setFormData(prev => {
+      const next = { ...prev, customerPhone: value };
+      if (value && value.length >= 10) {
+        const match = customers.find(c => c.phone === value);
+        if (match && match.name) {
+          next.customerName = match.name;
+        }
+      }
+      return next;
+    });
+  };
+
+  // Triggered by quick actions or converted enquiries
+  useEffect(() => {
+    if (prefilledForm) {
+      if (prefilledForm === 'new') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        openModal();
+      } else if (typeof prefilledForm === 'object') {
+        openModal(null, prefilledForm);
+      }
+      clearPrefilledForm();
+    }
+  }, [prefilledForm, clearPrefilledForm]);
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -376,7 +376,7 @@ export default function OrdersView({ prefilledForm, clearPrefilledForm }) {
                       type="tel"
                       required
                       value={formData.customerPhone}
-                      onChange={(e) => setFormData({...formData, customerPhone: e.target.value})}
+                      onChange={(e) => handleCustomerPhoneChange(e.target.value)}
                       placeholder="e.g. 9876543210"
                       className="form-input padding-left-icon"
                     />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Plus, 
   Search, 
@@ -7,12 +7,9 @@ import {
   Trash2, 
   CreditCard, 
   Calendar, 
-  Percent, 
-  AlertTriangle, 
-  ShieldCheck,
+  AlertTriangle,
   Phone,
-  User,
-  Sparkles
+  User
 } from 'lucide-react';
 import { useCRM, getTodayDateString } from '../context/CRMContext';
 
@@ -47,14 +44,18 @@ export default function SubscriptionsView() {
   });
 
   // Auto-complete customer name from phone selector
-  useEffect(() => {
-    if (formData.phone && formData.phone.length >= 10) {
-      const match = customers.find(c => c.phone === formData.phone);
-      if (match && match.name !== formData.customerName) {
-        setFormData(prev => ({ ...prev, customerName: match.name }));
+  const handleSubscriberPhoneChange = (value) => {
+    setFormData(prev => {
+      const next = { ...prev, phone: value };
+      if (value && value.length >= 10) {
+        const match = customers.find(c => c.phone === value);
+        if (match && match.name) {
+          next.customerName = match.name;
+        }
       }
-    }
-  }, [formData.phone, customers]);
+      return next;
+    });
+  };
 
   const openModal = (sub = null) => {
     if (sub) {
@@ -334,7 +335,7 @@ export default function SubscriptionsView() {
                       type="tel"
                       required
                       value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      onChange={(e) => handleSubscriberPhoneChange(e.target.value)}
                       placeholder="e.g. 9123456789"
                       className="form-input padding-left-icon"
                     />

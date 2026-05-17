@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Plus, 
   Search, 
@@ -8,15 +8,11 @@ import {
   User, 
   Phone, 
   MapPin, 
-  Tag, 
   Compass, 
-  Calendar, 
   AlertOctagon,
   X,
   CreditCard,
   ShoppingBag,
-  IndianRupee,
-  Activity,
   Award
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';

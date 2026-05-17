@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext } from 'react';
 
 const CRMContext = createContext();
 
@@ -408,9 +409,9 @@ export const CRMProvider = ({ children }) => {
     if (!enq) return null;
 
     // Check if customer exists in Customer Master
-    let cust = customers.find(c => c.phone === enq.phone);
-    if (!cust) {
-      cust = addCustomer({
+    const existingCustomer = customers.find(c => c.phone === enq.phone);
+    if (!existingCustomer) {
+      addCustomer({
         name: enq.name,
         phone: enq.phone,
         area: 'Converted Enquiry',

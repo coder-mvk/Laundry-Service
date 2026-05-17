@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
   Filter, 
   Edit, 
   Trash2, 
-  TrendingUp, 
   Phone, 
   Calendar,
-  MessageSquare,
   Sparkles,
   ArrowRightLeft,
   AlertTriangle
@@ -38,14 +36,6 @@ export default function EnquiryView({ prefilledForm, clearPrefilledForm, onConve
     date: ''
   });
 
-  // Handle prefilled triggers from Quick Actions
-  useEffect(() => {
-    if (prefilledForm === 'new') {
-      openModal();
-      clearPrefilledForm();
-    }
-  }, [prefilledForm]);
-
   const openModal = (enq = null) => {
     if (enq) {
       setEditingEnq(enq);
@@ -70,6 +60,15 @@ export default function EnquiryView({ prefilledForm, clearPrefilledForm, onConve
     }
     setIsModalOpen(true);
   };
+
+  // Handle prefilled triggers from Quick Actions
+  useEffect(() => {
+    if (prefilledForm === 'new') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      openModal();
+      clearPrefilledForm();
+    }
+  }, [prefilledForm, clearPrefilledForm]);
 
   const closeModal = () => {
     setIsModalOpen(false);
