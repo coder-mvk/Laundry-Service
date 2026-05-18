@@ -753,3 +753,276 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: scale(1); opacity: 1; }
 }
 
+/* ==========================================================================
+   Consolidated & Upgraded Shared UI Elements (For Premium Mobile Aesthetics)
+   ========================================================================== */
+
+/* Unified Form Input Grids */
+.grid-2-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.grid-3-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.padding-left-icon {
+  padding-left: 2.5rem !important;
+}
+
+.input-inner-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Standardized KPI Mini Metric Cards */
+.stat-mini {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+  position: relative;
+  z-index: 5;
+}
+
+.stat-mini-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.stat-mini-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: var(--font-heading);
+  line-height: 1;
+}
+
+/* Reusable Net Profit / Expense Audit Banner Layouts */
+.profit-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  border: 1px solid #dbeafe;
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.profit-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.sparkle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.profit-banner-left h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.profit-banner-left p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.financial-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.fin-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fin-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.fin-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-heading);
+}
+
+.fin-stat-operator {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--text-muted);
+}
+
+.profit-container .fin-val {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Empty Funnel / Dashboard / Table No-data States */
+.no-records-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  gap: 0.75rem;
+}
+
+/* ==========================================================================
+   Advanced Responsive Breakpoints (Mobile & Tablet Refinement)
+   ========================================================================== */
+
+/* Tablet Optimization */
+@media (max-width: 1024px) {
+  .profit-banner {
+    flex-direction: column;
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+  .profit-banner-left {
+    width: 100%;
+  }
+  .financial-stats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile Layout Optimizations */
+@media (max-width: 768px) {
+  .profit-banner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+    padding: 1.5rem 1.25rem;
+  }
+  .profit-banner-left {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .profit-banner-left h3 {
+    font-size: 1.1rem;
+  }
+  .profit-banner-left p {
+    font-size: 0.8rem;
+  }
+  .financial-stats {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  .fin-stat {
+    align-items: center !important;
+  }
+  .fin-stat-operator {
+    transform: rotate(90deg);
+    font-size: 1.1rem;
+    margin: 0.15rem 0;
+  }
+  .profit-container .fin-val {
+    font-size: 1.35rem;
+  }
+  .metric-card {
+    justify-content: center;
+  }
+}
+
+/* Specific Form & Filter Stacking for Viewports <= 640px */
+@media (max-width: 640px) {
+  .grid-2-form,
+  .grid-3-form {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  
+  .filters-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.65rem;
+  }
+  
+  .filter-item {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.35rem 0.85rem;
+  }
+  
+  .filter-select {
+    width: 100% !important;
+    flex: 1;
+    text-align: right;
+  }
+  
+  .search-box-container {
+    width: 100%;
+  }
+
+  .form-input {
+    font-size: 16px !important; /* Prevents native mobile browser zoom on interaction */
+  }
+}
+

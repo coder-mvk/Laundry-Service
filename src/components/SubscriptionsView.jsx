@@ -468,42 +468,6 @@ export default function SubscriptionsView() {
 
       <style>{`
         /* Local subscriptions CSS overrides */
-        .stat-mini {
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          background: #ffffff;
-          border: 1px solid #f1f5f9;
-          border-radius: 16px;
-          box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .stat-mini:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
-          position: relative;
-          z-index: 5;
-        }
-
-        .stat-mini-label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          line-height: 1;
-        }
-
-        .stat-mini-val {
-          font-size: 1.85rem;
-          font-weight: 800;
-          color: #0f172a;
-          font-family: var(--font-heading);
-          line-height: 1;
-        }
-
         .sub-progress-bar-bg {
           height: 8px;
           background-color: var(--border);

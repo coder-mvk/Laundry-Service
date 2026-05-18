@@ -589,76 +589,6 @@ export default function OrdersView({ prefilledForm, clearPrefilledForm }) {
 
       <style>{`
         /* Local orders stylesheet specifications */
-        .stat-mini {
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          background: #ffffff;
-          border: 1px solid #f1f5f9;
-          border-radius: 16px;
-          box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .stat-mini:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
-          position: relative;
-          z-index: 5;
-        }
-
-        .stat-mini-label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          line-height: 1;
-        }
-
-        .stat-mini-val {
-          font-size: 1.85rem;
-          font-weight: 800;
-          color: #0f172a;
-          font-family: var(--font-heading);
-          line-height: 1;
-        }
-
-        .grid-3-form {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-        }
-
-        .section-label {
-          font-size: 0.8rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--primary);
-          padding-bottom: 0.25rem;
-          border-bottom: 1px solid var(--border);
-          margin-bottom: 1rem;
-        }
-
-        .input-with-icon {
-          position: relative;
-        }
-
-        .padding-left-icon {
-          padding-left: 2.5rem !important;
-        }
-
-        .input-inner-icon {
-          position: absolute;
-          left: 0.85rem;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--text-muted);
-          pointer-events: none;
-        }
-
         .live-calculation-card {
           background: linear-gradient(135deg, #e0e7ff, #eff6ff);
           border: 1px dashed var(--primary);
@@ -693,13 +623,6 @@ export default function OrdersView({ prefilledForm, clearPrefilledForm }) {
           font-size: 0.65rem;
           color: var(--text-muted);
           font-weight: 500;
-        }
-
-        @media (max-width: 600px) {
-          .grid-3-form {
-            grid-template-columns: 1fr;
-            gap: 0;
-          }
         }
       `}</style>
     </div>
