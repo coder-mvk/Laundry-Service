@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useContext } from 'react';
+import { supabase } from '../lib/supabase';
 
 const CRMContext = createContext();
 
@@ -14,191 +15,39 @@ export const getTodayDateString = () => {
   return dd + '-' + mm + '-' + yyyy;
 };
 
-// Initial Demo/Seed Data matching the screenshots
-const initialEnquiries = [
-  {
-    id: 'ENQ001',
-    date: '17-05-2026',
-    name: 'Amit Kumar',
-    phone: '9123456789',
-    source: 'Whatsapp',
-    converted: 'Follow-up Pending', // 'Yes', 'No', 'Follow-up Pending'
-    followUp: 'Tomorrow'
-  },
-  {
-    id: 'ENQ002',
-    date: '16-05-2026',
-    name: 'Sneha Patel',
-    phone: '9812345678',
-    source: 'Call',
-    converted: 'Yes',
-    followUp: 'Completed'
-  },
-  {
-    id: 'ENQ003',
-    date: '15-05-2026',
-    name: 'Rohan Sharma',
-    phone: '9765432109',
-    source: 'Website',
-    converted: 'No',
-    followUp: 'Not Interested'
-  }
-];
-
-const initialOrders = [
-  {
-    id: 'ORD001',
-    date: '17-05-2026',
-    customerPhone: '9876543210',
-    customerName: 'Rahul',
-    service: 'Wash+Iron', // 'Wash+Iron', 'Wash+Fold', 'Dry Clean', 'Steam Iron'
-    pricePerKg: 70,
-    weight: 5,
-    deliveryChrg: 70,
-    amount: 420, // Calculated: (Price * Weight) + Delivery
-    payment: 'Paid', // 'Paid', 'Unpaid'
-    pickup: 'No', // 'Yes', 'No'
-    delivery: 'Delivered', // 'Delivered', 'Pending', 'In Progress'
-    status: 'Done', // 'Done', 'In Progress', 'Pending'
-    priority: 'Normal' // 'Normal', 'High'
-  },
-  {
-    id: 'ORD002',
-    date: '17-05-2026',
-    customerPhone: '9123456789',
-    customerName: 'Amit Kumar',
-    service: 'Dry Clean',
-    pricePerKg: 120,
-    weight: 3,
-    deliveryChrg: 50,
-    amount: 410,
-    payment: 'Unpaid',
-    pickup: 'Yes',
-    delivery: 'Pending',
-    status: 'In Progress',
-    priority: 'High'
-  }
-];
-
-const initialCustomers = [
-  {
-    id: 'CUST2026001',
-    name: 'Rahul',
-    phone: '9876543210',
-    area: 'Talegaon',
-    address: 'Somatne',
-    customerType: 'Hostel', // 'Hostel', 'Residential', 'Commercial'
-    plan: 'None', // 'None', 'Silver', 'Gold', 'Platinum'
-    status: 'Active' // 'Active', 'Inactive'
-  },
-  {
-    id: 'CUST2026002',
-    name: 'Amit Kumar',
-    phone: '9123456789',
-    area: 'Ravet',
-    address: 'Sector 29, Flat 405',
-    customerType: 'Residential',
-    plan: 'Silver',
-    status: 'Active'
-  },
-  {
-    id: 'CUST2026003',
-    name: 'Sneha Patel',
-    phone: '9812345678',
-    area: 'Akurdi',
-    address: 'Near Station',
-    customerType: 'Hostel',
-    plan: 'Gold',
-    status: 'Active'
-  }
-];
-
-const initialSubscriptions = [
-  {
-    id: 'SUB001',
-    customerName: 'Amit Kumar',
-    phone: '9123456789',
-    plan: 'Silver', // Silver: 15kg/mo, Gold: 30kg/mo, Platinum: 50kg/mo
-    startDate: '10-05-2026',
-    endDate: '10-06-2026',
-    remainingKg: 12, // Initially 15kg, used 3kg in ORD002
-    renewalStatus: 'Active' // 'Active', 'Expired', 'Near Expiry'
-  },
-  {
-    id: 'SUB002',
-    customerName: 'Sneha Patel',
-    phone: '9812345678',
-    plan: 'Gold',
-    startDate: '01-05-2026',
-    endDate: '01-06-2026',
-    remainingKg: 30,
-    renewalStatus: 'Active'
-  }
-];
-
-const initialExpenses = [
-  {
-    id: 'EXP001',
-    date: '17-05-2026',
-    type: 'Petrol', // 'Petrol', 'Detergents', 'Electricity', 'Rent', 'Salaries', 'Others'
-    amount: 300,
-    notes: 'Pickup rounds'
-  },
-  {
-    id: 'EXP002',
-    date: '15-05-2026',
-    type: 'Detergents',
-    amount: 1250,
-    notes: 'Bulk buy surf excel & softener'
-  }
-];
-
 export const CRMProvider = ({ children }) => {
-  const [enquiries, setEnquiries] = useState(() => {
-    const local = localStorage.getItem('laundry_enquiries');
-    return local ? JSON.parse(local) : initialEnquiries;
-  });
+  const [enquiries, setEnquiries] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  const [orders, setOrders] = useState(() => {
-    const local = localStorage.getItem('laundry_orders');
-    return local ? JSON.parse(local) : initialOrders;
-  });
-
-  const [customers, setCustomers] = useState(() => {
-    const local = localStorage.getItem('laundry_customers');
-    return local ? JSON.parse(local) : initialCustomers;
-  });
-
-  const [subscriptions, setSubscriptions] = useState(() => {
-    const local = localStorage.getItem('laundry_subscriptions');
-    return local ? JSON.parse(local) : initialSubscriptions;
-  });
-
-  const [expenses, setExpenses] = useState(() => {
-    const local = localStorage.getItem('laundry_expenses');
-    return local ? JSON.parse(local) : initialExpenses;
-  });
-
-  // Sync state to LocalStorage
+  // Fetch Data from Supabase on mount
   useEffect(() => {
-    localStorage.setItem('laundry_enquiries', JSON.stringify(enquiries));
-  }, [enquiries]);
-
-  useEffect(() => {
-    localStorage.setItem('laundry_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
-    localStorage.setItem('laundry_customers', JSON.stringify(customers));
-  }, [customers]);
-
-  useEffect(() => {
-    localStorage.setItem('laundry_subscriptions', JSON.stringify(subscriptions));
-  }, [subscriptions]);
-
-  useEffect(() => {
-    localStorage.setItem('laundry_expenses', JSON.stringify(expenses));
-  }, [expenses]);
+    const fetchAllData = async () => {
+      try {
+        const [enqRes, ordRes, custRes, subRes, expRes] = await Promise.all([
+          supabase.from('enquiries').select('*').order('created_at', { ascending: false }),
+          supabase.from('orders').select('*').order('created_at', { ascending: false }),
+          supabase.from('customers').select('*').order('created_at', { ascending: false }),
+          supabase.from('subscriptions').select('*').order('created_at', { ascending: false }),
+          supabase.from('expenses').select('*').order('created_at', { ascending: false })
+        ]);
+        
+        if (enqRes.data) setEnquiries(enqRes.data);
+        if (ordRes.data) setOrders(ordRes.data);
+        if (custRes.data) setCustomers(custRes.data);
+        if (subRes.data) setSubscriptions(subRes.data);
+        if (expRes.data) setExpenses(expRes.data);
+      } catch (err) {
+        console.error('Error fetching data from Supabase', err);
+      } finally {
+        setIsDataLoaded(true);
+      }
+    };
+    fetchAllData();
+  }, []);
 
   // Compute 360 Customer Master Dynamic Statistics on-the-fly
   const getCustomersWithStats = () => {
@@ -236,35 +85,43 @@ export const CRMProvider = ({ children }) => {
   };
 
   // Mutators: Enquiries
-  const addEnquiry = (enquiry) => {
+  const addEnquiry = async (enquiry) => {
     const newEnq = {
       ...enquiry,
-      id: `ENQ${String(enquiries.length + 1).padStart(3, '0')}`,
+      id: `ENQ${Date.now()}`, // More reliable unique ID than length
       date: enquiry.date || getTodayDateString()
     };
     setEnquiries(prev => [newEnq, ...prev]);
+    const { error } = await supabase.from('enquiries').insert([newEnq]);
+    if (error) console.error('Error adding enquiry:', error);
     return newEnq;
   };
 
-  const updateEnquiry = (updatedEnq) => {
+  const updateEnquiry = async (updatedEnq) => {
     setEnquiries(prev => prev.map(e => e.id === updatedEnq.id ? updatedEnq : e));
+    const { error } = await supabase.from('enquiries').update(updatedEnq).eq('id', updatedEnq.id);
+    if (error) console.error('Error updating enquiry:', error);
   };
 
-  const deleteEnquiry = (id) => {
+  const deleteEnquiry = async (id) => {
     setEnquiries(prev => prev.filter(e => e.id !== id));
+    const { error } = await supabase.from('enquiries').delete().eq('id', id);
+    if (error) console.error('Error deleting enquiry:', error);
   };
 
   // Mutators: Orders
-  const addOrder = (order) => {
+  const addOrder = async (order) => {
     const computedAmount = (Number(order.pricePerKg || 0) * Number(order.weight || 0)) + Number(order.deliveryChrg || 0);
     const newOrd = {
       ...order,
-      id: `ORD${String(orders.length + 1).padStart(3, '0')}`,
+      id: `ORD${Date.now()}`,
       date: order.date || getTodayDateString(),
       amount: computedAmount
     };
 
     setOrders(prev => [newOrd, ...prev]);
+    const { error } = await supabase.from('orders').insert([newOrd]);
+    if (error) console.error('Error adding order:', error);
 
     // Check if customer exists in Customer Master, if not add them
     const customerExists = customers.some(c => c.phone === order.customerPhone);
@@ -292,7 +149,7 @@ export const CRMProvider = ({ children }) => {
     return newOrd;
   };
 
-  const updateOrder = (updatedOrd) => {
+  const updateOrder = async (updatedOrd) => {
     const computedAmount = (Number(updatedOrd.pricePerKg || 0) * Number(updatedOrd.weight || 0)) + Number(updatedOrd.deliveryChrg || 0);
     const finalOrd = { ...updatedOrd, amount: computedAmount };
     
@@ -310,9 +167,11 @@ export const CRMProvider = ({ children }) => {
     }
 
     setOrders(prev => prev.map(o => o.id === finalOrd.id ? finalOrd : o));
+    const { error } = await supabase.from('orders').update(finalOrd).eq('id', finalOrd.id);
+    if (error) console.error('Error updating order:', error);
   };
 
-  const deleteOrder = (id) => {
+  const deleteOrder = async (id) => {
     // Reverse subscription deduction if deleted
     const ord = orders.find(o => o.id === id);
     if (ord) {
@@ -325,35 +184,45 @@ export const CRMProvider = ({ children }) => {
       }
     }
     setOrders(prev => prev.filter(o => o.id !== id));
+    const { error } = await supabase.from('orders').delete().eq('id', id);
+    if (error) console.error('Error deleting order:', error);
   };
 
   // Mutators: Customers
-  const addCustomer = (customer) => {
+  const addCustomer = async (customer) => {
     const newCust = {
       ...customer,
-      id: `CUST${new Date().getFullYear()}${String(customers.length + 1).padStart(3, '0')}`,
+      id: `CUST${Date.now()}`,
       status: customer.status || 'Active'
     };
-    setCustomers(prev => [...prev, newCust]);
+    setCustomers(prev => [newCust, ...prev]);
+    const { error } = await supabase.from('customers').insert([newCust]);
+    if (error) console.error('Error adding customer:', error);
     return newCust;
   };
 
-  const updateCustomer = (updatedCust) => {
+  const updateCustomer = async (updatedCust) => {
     setCustomers(prev => prev.map(c => c.id === updatedCust.id ? updatedCust : c));
+    const { error } = await supabase.from('customers').update(updatedCust).eq('id', updatedCust.id);
+    if (error) console.error('Error updating customer:', error);
   };
 
-  const deleteCustomer = (id) => {
+  const deleteCustomer = async (id) => {
     setCustomers(prev => prev.filter(c => c.id !== id));
+    const { error } = await supabase.from('customers').delete().eq('id', id);
+    if (error) console.error('Error deleting customer:', error);
   };
 
   // Mutators: Subscriptions
-  const addSubscription = (sub) => {
+  const addSubscription = async (sub) => {
     const newSub = {
       ...sub,
-      id: `SUB${String(subscriptions.length + 1).padStart(3, '0')}`,
+      id: `SUB${Date.now()}`,
       renewalStatus: sub.renewalStatus || 'Active'
     };
     setSubscriptions(prev => [newSub, ...prev]);
+    const { error } = await supabase.from('subscriptions').insert([newSub]);
+    if (error) console.error('Error adding subscription:', error);
 
     // Update plan in Customer Master
     const cust = customers.find(c => c.phone === sub.phone);
@@ -363,8 +232,10 @@ export const CRMProvider = ({ children }) => {
     return newSub;
   };
 
-  const updateSubscription = (updatedSub) => {
+  const updateSubscription = async (updatedSub) => {
     setSubscriptions(prev => prev.map(s => s.id === updatedSub.id ? updatedSub : s));
+    const { error } = await supabase.from('subscriptions').update(updatedSub).eq('id', updatedSub.id);
+    if (error) console.error('Error updating subscription:', error);
     
     // Make sure plan syncs in Customer Master
     const cust = customers.find(c => c.phone === updatedSub.phone);
@@ -373,7 +244,7 @@ export const CRMProvider = ({ children }) => {
     }
   };
 
-  const deleteSubscription = (id) => {
+  const deleteSubscription = async (id) => {
     const sub = subscriptions.find(s => s.id === id);
     if (sub) {
       const cust = customers.find(c => c.phone === sub.phone);
@@ -382,25 +253,33 @@ export const CRMProvider = ({ children }) => {
       }
     }
     setSubscriptions(prev => prev.filter(s => s.id !== id));
+    const { error } = await supabase.from('subscriptions').delete().eq('id', id);
+    if (error) console.error('Error deleting subscription:', error);
   };
 
   // Mutators: Expenses
-  const addExpense = (expense) => {
+  const addExpense = async (expense) => {
     const newExp = {
       ...expense,
-      id: `EXP${String(expenses.length + 1).padStart(3, '0')}`,
+      id: `EXP${Date.now()}`,
       date: expense.date || getTodayDateString()
     };
     setExpenses(prev => [newExp, ...prev]);
+    const { error } = await supabase.from('expenses').insert([newExp]);
+    if (error) console.error('Error adding expense:', error);
     return newExp;
   };
 
-  const updateExpense = (updatedExp) => {
+  const updateExpense = async (updatedExp) => {
     setExpenses(prev => prev.map(e => e.id === updatedExp.id ? updatedExp : e));
+    const { error } = await supabase.from('expenses').update(updatedExp).eq('id', updatedExp.id);
+    if (error) console.error('Error updating expense:', error);
   };
 
-  const deleteExpense = (id) => {
+  const deleteExpense = async (id) => {
     setExpenses(prev => prev.filter(e => e.id !== id));
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    if (error) console.error('Error deleting expense:', error);
   };
 
   // Enquiry Conversion flow helper
@@ -445,52 +324,6 @@ export const CRMProvider = ({ children }) => {
     };
   };
 
-  // JSON State Reset / Seed Restore
-  const restoreSeedData = () => {
-    setEnquiries(initialEnquiries);
-    setOrders(initialOrders);
-    setCustomers(initialCustomers);
-    setSubscriptions(initialSubscriptions);
-    setExpenses(initialExpenses);
-  };
-
-  // Clear all data (Wipe database for real entries)
-  const clearAllData = () => {
-    setEnquiries([]);
-    setOrders([]);
-    setCustomers([]);
-    setSubscriptions([]);
-    setExpenses([]);
-  };
-
-  // Import State from JSON
-  const importFullBackup = (backupObj) => {
-    try {
-      if (backupObj.enquiries) setEnquiries(backupObj.enquiries);
-      if (backupObj.orders) setOrders(backupObj.orders);
-      if (backupObj.customers) setCustomers(backupObj.customers);
-      if (backupObj.subscriptions) setSubscriptions(backupObj.subscriptions);
-      if (backupObj.expenses) setExpenses(backupObj.expenses);
-      return { success: true };
-    } catch (err) {
-      console.error(err);
-      return { success: false, error: err.message };
-    }
-  };
-
-  // Export full backup as JSON download
-  const exportFullBackup = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
-      JSON.stringify({ enquiries, orders, customers: getCustomersWithStats(), subscriptions, expenses }, null, 2)
-    );
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `laundry_crm_backup_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
   return (
     <CRMContext.Provider value={{
       enquiries,
@@ -498,6 +331,7 @@ export const CRMProvider = ({ children }) => {
       customers: getCustomersWithStats(),
       subscriptions,
       expenses,
+      isDataLoaded,
       addEnquiry,
       updateEnquiry,
       deleteEnquiry,
@@ -513,11 +347,7 @@ export const CRMProvider = ({ children }) => {
       addExpense,
       updateExpense,
       deleteExpense,
-      convertEnquiryToOrder,
-      restoreSeedData,
-      clearAllData,
-      importFullBackup,
-      exportFullBackup
+      convertEnquiryToOrder
     }}>
       {children}
     </CRMContext.Provider>

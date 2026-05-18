@@ -5,9 +5,11 @@ import {
   FileSpreadsheet, 
   Database,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  CloudLightning
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
+import { supabase } from '../lib/supabase';
 
 export default function DataPortability() {
   const { 
@@ -127,6 +129,31 @@ export default function DataPortability() {
     reader.readAsText(file);
   };
 
+  // Migrate LocalStorage to Supabase
+  const handleMigrateToSupabase = async () => {
+    if (!window.confirm("Are you sure you want to migrate LocalStorage data to Supabase? This will upload your local data to the cloud.")) return;
+    
+    setImportStatus({ type: 'success', message: 'Starting migration... Please wait.' });
+    try {
+      const enq = JSON.parse(localStorage.getItem('laundry_enquiries') || '[]');
+      const ord = JSON.parse(localStorage.getItem('laundry_orders') || '[]');
+      const cust = JSON.parse(localStorage.getItem('laundry_customers') || '[]');
+      const sub = JSON.parse(localStorage.getItem('laundry_subscriptions') || '[]');
+      const exp = JSON.parse(localStorage.getItem('laundry_expenses') || '[]');
+
+      if (enq.length) await supabase.from('enquiries').upsert(enq);
+      if (ord.length) await supabase.from('orders').upsert(ord);
+      if (cust.length) await supabase.from('customers').upsert(cust);
+      if (sub.length) await supabase.from('subscriptions').upsert(sub);
+      if (exp.length) await supabase.from('expenses').upsert(exp);
+
+      setImportStatus({ type: 'success', message: 'Migration to Supabase completed successfully! Reloading...' });
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (err) {
+      setImportStatus({ type: 'error', message: `Migration failed: ${err.message}` });
+    }
+  };
+
   return (
     <div className="fade-in">
       <div className="margin-bottom-md">
@@ -241,6 +268,15 @@ export default function DataPortability() {
                 className="hidden-file-input"
               />
             </div>
+
+            <div className="backup-divider margin-top-lg">
+              <span>CLOUD MIGRATION</span>
+            </div>
+
+            <button onClick={handleMigrateToSupabase} className="btn w-full py-3 flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+              <CloudLightning size={18} />
+              <span>Migrate LocalStorage to Supabase</span>
+            </button>
           </div>
         </div>
       </div>

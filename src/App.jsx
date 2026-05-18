@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CRMProvider } from './context/CRMContext';
+import { CRMProvider, useCRM } from './context/CRMContext';
 import Sidebar from './components/Sidebar';
 import DashboardView from './components/DashboardView';
 import EnquiryView from './components/EnquiryView';
@@ -11,6 +11,7 @@ import DataPortability from './components/DataPortability';
 import './App.css';
 
 function AppContent() {
+  const { isDataLoaded } = useCRM();
   const [activeTab, setActiveTab] = useState('dashboard');
   
   // Shared state to allow pre-filling forms across different tabs
@@ -66,6 +67,18 @@ function AppContent() {
         return <DashboardView setActiveTab={setActiveTab} setPrefilledForm={setPrefilledForm} />;
     }
   };
+
+  if (!isDataLoaded) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', backgroundColor: 'var(--bg-body)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner" style={{ border: '4px solid rgba(0,0,0,0.1)', width: '40px', height: '40px', borderRadius: '50%', borderLeftColor: 'var(--primary)', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }}></div>
+          <h3 style={{ color: 'var(--text-main)' }}>Connecting to Supabase...</h3>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
