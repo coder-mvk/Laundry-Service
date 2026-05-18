@@ -18,7 +18,7 @@ import {
 import { useCRM } from '../context/CRMContext';
 
 export default function CustomersView() {
-  const { customers, orders, subscriptions, enquiries, addCustomer, updateCustomer, deleteCustomer } = useCRM();
+  const { customers, orders, subscriptions, enquiries, addCustomer, updateCustomer, deleteCustomer, showToast } = useCRM();
 
   // Search & Filters state
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,21 +76,21 @@ export default function CustomersView() {
     setEditingCust(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
       alert("Name and Phone number are required!");
       return;
     }
 
-    if (editingCust) {
-      updateCustomer({
-        ...editingCust,
-        ...formData
-      });
-    } else {
-      addCustomer(formData);
+    const payload = editingCust ? { ...editingCust, ...formData } : formData;
+    const success = editingCust ? await updateCustomer(payload) : await addCustomer(payload);
+
+    if (!success) {
+      showToast('Unable to save customer record. Please try again.', 'error', 5000);
+      return;
     }
+
     closeModal();
   };
 

@@ -54,15 +54,20 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     });
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
+    let success = false;
+
     if (confirmModal.type === 'restore') {
-      restoreSeedData();
-      window.location.reload();
+      success = await restoreSeedData();
     } else if (confirmModal.type === 'clear') {
-      clearAllData();
+      success = await clearAllData();
+    }
+
+    setConfirmModal({ isOpen: false, type: null, title: '', message: '', severity: '' });
+
+    if (success) {
       window.location.reload();
     }
-    setConfirmModal({ isOpen: false, type: null, title: '', message: '', severity: '' });
   };
 
   return (

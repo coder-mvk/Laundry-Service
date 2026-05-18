@@ -123,20 +123,57 @@ export default function DataPortability() {
     document.body.removeChild(link);
   };
 
+  const inferTableType = (items) => {
+    if (!Array.isArray(items) || items.length === 0) return null;
+    const sample = items[0];
+    if (!sample || typeof sample !== 'object') return null;
+
+    if ('customerPhone' in sample || 'pricePerKg' in sample || 'deliveryChrg' in sample) return 'orders';
+    if ('remainingKg' in sample || 'renewalStatus' in sample) return 'subscriptions';
+    if ('converted' in sample || 'followUp' in sample) return 'enquiries';
+    if ('area' in sample || 'plan' in sample || 'status' in sample) return 'customers';
+    if ('type' in sample && 'amount' in sample) return 'expenses';
+
+    return null;
+  };
+
+  const normalizeImportedJSON = (parsedData) => {
+    if (!parsedData || typeof parsedData !== 'object') return null;
+
+    if (Array.isArray(parsedData)) {
+      const table = inferTableType(parsedData);
+      return table ? { [table]: parsedData } : null;
+    }
+
+    const payload = {};
+    ['enquiries', 'orders', 'customers', 'subscriptions', 'expenses'].forEach((table) => {
+      if (Array.isArray(parsedData[table])) payload[table] = parsedData[table];
+    });
+
+    if (Object.keys(payload).length > 0) return payload;
+    if (parsedData.data && typeof parsedData.data === 'object') return normalizeImportedJSON(parsedData.data);
+    if (parsedData.backup && typeof parsedData.backup === 'object') return normalizeImportedJSON(parsedData.backup);
+
+    return null;
+  };
+
   // JSON File upload handler
   const handleJSONUpload = async (e) => {
-    const file = e.target.files[0];
+    const fileInput = e.target;
+    const file = fileInput?.files?.[0];
     if (!file) return;
+    fileInput.value = '';
 
     setImportStatus({ type: 'success', message: 'Reading file... Please wait.' });
 
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
-        const data = JSON.parse(event.target.result);
-        
-        if (!data.enquiries && !data.orders && !data.customers && !data.subscriptions && !data.expenses) {
-          throw new Error('Invalid structure');
+        const rawData = JSON.parse(event.target.result);
+        const data = normalizeImportedJSON(rawData);
+
+        if (!data) {
+          throw new Error('Unsupported JSON structure');
         }
 
         setImportStatus({ type: 'success', message: 'Uploading backup to Supabase...' });

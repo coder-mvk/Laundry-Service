@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supabase Connection Diagnostic</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', monospace; padding: 2rem; min-height: 100vh; }
+    h1 { color: #818cf8; font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #64748b; font-size: 0.8rem; margin-bottom: 2rem; }
+    .config-box { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.8rem; }
+    .config-row { display: flex; gap: 1rem; margin-bottom: 0.3rem; }
+    .config-label { color: #64748b; width: 120px; flex-shrink: 0; }
+    .config-val { color: #94a3b8; word-break: break-all; }
+    .table-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+    .table-name { color: #a5b4fc; font-weight: 700; text-transform: uppercase; font-size: 0.78rem; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
+    .op-row { display: flex; gap: 1rem; font-size: 0.78rem; margin-bottom: 0.2rem; align-items: flex-start; }
+    .op-label { color: #475569; width: 70px; flex-shrink: 0; padding-top: 1px; }
+    .op-result { flex: 1; }
+    .ok    { color: #4ade80; }
+    .fail  { color: #f87171; }
+    .wait  { color: #fbbf24; }
+    .hint-box { background: #172554; border: 1px solid #1e40af; border-radius: 10px; padding: 1rem 1.25rem; margin-top: 1.5rem; font-size: 0.78rem; color: #93c5fd; line-height: 1.7; }
+    .hint-box strong { color: #bfdbfe; }
+    .hint-box code { background: #1e3a8a; padding: 0.1rem 0.4rem; border-radius: 4px; color: #fbbf24; font-size: 0.75rem; }
+    .running-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: #422006; color: #fbbf24; border: 1px solid #d97706; padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1.25rem; }
+    .done-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: #14532d; color: #4ade80; border: 1px solid #16a34a; padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1.25rem; }
+    .summary { margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; }
+    .summary.all-ok { background: #14532d; border: 1px solid #16a34a; color: #86efac; }
+    .summary.has-errors { background: #7f1d1d; border: 1px solid #b91c1c; color: #fca5a5; }
+  </style>
+</head>
+<body>
+
+<h1>🔬 Supabase Live Diagnostic</h1>
+<p class="subtitle">Tests SELECT + INSERT + DELETE on every CRM table and shows exact errors</p>
+
+<div class="config-box">
+  <div class="config-row"><span class="config-label">Project URL:</span><span class="config-val" id="cfg-url">reading…</span></div>
+  <div class="config-row"><span class="config-label">Anon Key:</span><span class="config-val" id="cfg-key">reading…</span></div>
+</div>
+
+<div id="status-badge" class="running-badge">⏳ Running diagnostics…</div>
+
+<div id="results"></div>
+<div id="summary"></div>
+<div id="hints"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // ── PASTE YOUR VALUES HERE ──────────────────────────────────────────
+  const SUPABASE_URL = 'https://ypdrdksrbfmhcbqxgqot.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_aaoiC0OeOQjh-bU9JudBFw_Iio5tqEi';
+  // ───────────────────────────────────────────────────────────────────
+
+  document.getElementById('cfg-url').textContent = SUPABASE_URL || '⚠️ EMPTY';
+  document.getElementById('cfg-key').textContent = SUPABASE_ANON_KEY
+    ? SUPABASE_ANON_KEY.substring(0, 30) + '…'
+    : '⚠️ EMPTY';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const TABLES = ['enquiries', 'orders', 'customers', 'subscriptions', 'expenses'];
+
+  const TEST_INSERTS = {
+    enquiries:     { name:'__diag__', phone:'0000000000', source:'Direct', converted:'Follow-up Pending', followUp:'Tomorrow', date:'01-01-2025' },
+    orders:        { customerPhone:'0000000000', customerName:'__diag__', service:'Wash+Iron', weight:1, pricePerKg:70, deliveryChrg:0, amount:70, payment:'Unpaid', pickup:'No', delivery:'Pending', status:'Pending', priority:'Normal', date:'01-01-2025' },
+    customers:     { name:'__diag__', phone:'0000000000', area:'Test', address:'N/A', customerType:'Residential', plan:'None', status:'Active' },
+    subscriptions: { customerName:'__diag__', phone:'0000000000', plan:'Silver', startDate:'01-01-2025', endDate:'01-02-2025', remainingKg:15, renewalStatus:'Active' },
+    expenses:      { type:'Petrol', amount:1, notes:'__diag__', date:'01-01-2025' },
+  };
+
+  const resultsEl  = document.getElementById('results');
+  const summaryEl  = document.getElementById('summary');
+  const hintsEl    = document.getElementById('hints');
+  const statusEl   = document.getElementById('status-badge');
+
+  const allErrors = [];
+
+  function setOp(tableEl, op, html, cls) {
+    tableEl.querySelector(`.op-result[data-op="${op}"]`).innerHTML = `<span class="${cls}">${html}</span>`;
+  }
+
+  for (const table of TABLES) {
+    const card = document.createElement('div');
+    card.className = 'table-card';
+    card.innerHTML = `
+      <div class="table-name">📋 ${table}</div>
+      <div class="op-row"><span class="op-label">SELECT</span>  <span class="op-result wait" data-op="select">⏳ testing…</span></div>
+      <div class="op-row"><span class="op-label">INSERT</span>  <span class="op-result wait" data-op="insert">⏳ waiting…</span></div>
+      <div class="op-row"><span class="op-label">CLEANUP</span> <span class="op-result wait" data-op="cleanup">⏳ waiting…</span></div>
+    `;
+    resultsEl.appendChild(card);
+
+    // SELECT
+    const { data: selData, error: selErr } = await supabase.from(table).select('id').limit(1);
+    if (selErr) {
+      setOp(card, 'select', `❌ ${selErr.message} (code: ${selErr.code})`, 'fail');
+      setOp(card, 'insert',  '⏭ skipped (SELECT failed)', 'wait');
+      setOp(card, 'cleanup', '⏭ skipped', 'wait');
+      allErrors.push(`${table} SELECT: ${selErr.message} [${selErr.code}]`);
+      continue;
+    }
+    setOp(card, 'select', `✅ OK — ${selData?.length ?? 0} row(s) readable`, 'ok');
+
+    // INSERT
+    const { data: insData, error: insErr } = await supabase.from(table).insert([TEST_INSERTS[table]]).select('id');
+    if (insErr) {
+      setOp(card, 'insert',  `❌ ${insErr.message} (code: ${insErr.code})`, 'fail');
+      setOp(card, 'cleanup', '⏭ skipped', 'wait');
+      allErrors.push(`${table} INSERT: ${insErr.message} [${insErr.code}]`);
+      continue;
+    }
+    const insertedId = insData?.[0]?.id;
+    setOp(card, 'insert', `✅ OK — id: ${insertedId}`, 'ok');
+
+    // DELETE (cleanup)
+    const { error: delErr } = await supabase.from(table).delete().eq('id', insertedId);
+    if (delErr) {
+      setOp(card, 'cleanup', `❌ Cleanup failed: ${delErr.message}`, 'fail');
+      allErrors.push(`${table} DELETE: ${delErr.message}`);
+    } else {
+      setOp(card, 'cleanup', '✅ Cleaned up', 'ok');
+    }
+  }
+
+  // Status badge
+  statusEl.className = allErrors.length ? 'running-badge' : 'done-badge';
+  statusEl.textContent = allErrors.length ? `⚠️ ${allErrors.length} issue(s) found` : '✅ All tests passed!';
+
+  // Summary
+  if (allErrors.length === 0) {
+    summaryEl.innerHTML = `<div class="summary all-ok">✅ All 5 tables responded correctly to SELECT, INSERT and DELETE. Your Supabase connection is working. Forms in the app should save data normally.</div>`;
+  } else {
+    summaryEl.innerHTML = `<div class="summary has-errors">❌ Errors detected:<br><br>${allErrors.map(e => `• ${e}`).join('<br>')}</div>`;
+  }
+
+  // Hints
+  const hintLines = [];
+  const hasTable = allErrors.some(e => e.includes('42P01') || e.includes('relation') || e.includes('does not exist'));
+  const hasRLS   = allErrors.some(e => e.includes('42501') || e.includes('violates') || e.includes('permission'));
+  const hasCol   = allErrors.some(e => e.includes('column') || e.includes('42703'));
+
+  if (hasTable) hintLines.push(`<strong>Missing tables</strong> — Run <code>supabase_schema.sql</code> in Supabase Dashboard → SQL Editor.`);
+  if (hasRLS)   hintLines.push(`<strong>RLS blocking inserts</strong> — Run the RLS policy SQL at the bottom of <code>supabase_schema.sql</code>, or temporarily disable RLS for testing.`);
+  if (hasCol)   hintLines.push(`<strong>Column name mismatch</strong> — The table exists but has different column names. Drop and recreate tables using <code>supabase_schema.sql</code>.`);
+  if (!hasTable && !hasRLS && !hasCol && allErrors.length > 0) {
+    hintLines.push(`<strong>Unknown error</strong> — Check the error codes above against Supabase docs. Common fix: verify your project URL and anon key.`);
+  }
+
+  if (hintLines.length > 0) {
+    hintsEl.innerHTML = `<div class="hint-box"><strong>💡 How to fix:</strong><br><br>${hintLines.join('<br><br>')}</div>`;
+  }
+</script>
+</body>
+</html>
