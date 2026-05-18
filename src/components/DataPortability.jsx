@@ -17,9 +17,7 @@ export default function DataPortability() {
     orders, 
     customers, 
     subscriptions, 
-    expenses, 
-    importFullBackup, 
-    exportFullBackup
+    expenses
   } = useCRM();
 
   const [importStatus, setImportStatus] = useState(null);
@@ -104,25 +102,57 @@ export default function DataPortability() {
     downloadCSV(exportPayload.csv, `laundry_crm_${exportPayload.fileName}`);
   };
 
+  const exportFullBackup = () => {
+    const backupData = {
+      enquiries,
+      orders,
+      customers,
+      subscriptions,
+      expenses,
+      timestamp: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `laundry_crm_full_backup_${new Date().toISOString().split('T')[0]}.json`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // JSON File upload handler
-  const handleJSONUpload = (e) => {
+  const handleJSONUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setImportStatus({ type: 'success', message: 'Reading file... Please wait.' });
+
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const data = JSON.parse(event.target.result);
-        const res = importFullBackup(data);
-        if (res.success) {
-          setImportStatus({ type: 'success', message: 'Workspace fully loaded from backup! Reloading...' });
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          setImportStatus({ type: 'error', message: `Import failed: ${res.error}` });
+        
+        if (!data.enquiries && !data.orders && !data.customers && !data.subscriptions && !data.expenses) {
+          throw new Error('Invalid structure');
         }
-      } catch {
+
+        setImportStatus({ type: 'success', message: 'Uploading backup to Supabase...' });
+
+        if (data.enquiries?.length) await supabase.from('enquiries').upsert(data.enquiries);
+        if (data.orders?.length) await supabase.from('orders').upsert(data.orders);
+        if (data.customers?.length) await supabase.from('customers').upsert(data.customers);
+        if (data.subscriptions?.length) await supabase.from('subscriptions').upsert(data.subscriptions);
+        if (data.expenses?.length) await supabase.from('expenses').upsert(data.expenses);
+
+        setImportStatus({ type: 'success', message: 'Workspace fully loaded from backup! Reloading...' });
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } catch (err) {
+        console.error(err);
         setImportStatus({ type: 'error', message: 'Invalid backup file structure! Please upload a valid JSON backup.' });
       }
     };
